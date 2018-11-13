@@ -20,6 +20,11 @@ import com.xiaobai.service.IUserService;
  * redis的查询速度之于MySQL的查询速度相当于 内存读写速度 /硬盘读写速度
  * @Cacheable("a")注解的意义就是把该方法的查询结果放到redis中去，下一次再发起查询就去redis中去取，存在redis中的数据的key就是a；
  * @CacheEvict(value={"a","b"},allEntries=true) 的意思就是执行该方法后要清除redis中key名称为a,b的数据；
+ *
+ *  ①使用了@Cacheable（value="myUser"），即表示缓存中有，直接从缓存取出，没有的话先从数据库中查出，然后再插入
+　　②如果未在类上使用@CacheConfig注解规定数据要缓存到哪个库中，就必须给value一个值，规定数据最后缓存到哪个redis库中
+　　③因为redis缓存数据实际就是键值对的形式存储，因此必须给定key-value的key,这里没有给key参数赋值，所以key的生成规则按照上面工具类中规定的key生成的
+　　④key-value的value就是本方法的返回值，如果要缓存登录用户信息，本方法需要进行修改，返回user对象就可以缓存到key-value的value中
  */
 @Service("userService")
 @Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)

@@ -215,6 +215,16 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <!--<version>2.5</version>-->
+                    <webResources>
+                        <resource>
+                            <!-- 元配置文件的目录，相对于pom.xml文件的路径 -->
+                            <directory>web/WEB-INF</directory>
+                            <!-- 是否过滤文件，也就是是否启动auto-config的功能 -->
+                            <filtering>true</filtering>
+                            <!-- 目标路径 -->
+                            <targetPath>WEB-INF</targetPath>
+                        </resource>
+                    </webResources>
                     <webXml>web/WEB-INF/web.xml</webXml>
                 </configuration>
             </plugin>

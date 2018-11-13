@@ -37,10 +37,10 @@
         <property name="testConnectionOnCheckout" value="true" />
     </bean>
 
-    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+    <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 如果不配置mapperLocations，需要Mapper.xml和对应接口在同一个classpath路径，且同名 -->
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="configLocation" value="classpath:conf/mybatis-config.xml"></property>
+        <property name="configLocation" value="classpath:conf/mybatis-config.xml"></property><!-- 这里配置mybatis的配置映射文件，是为了打印sql语句 -->
         <!--<property name="mapperLocations" value="classpath:com/xiaobai/dao/*.xml"></property>-->
     </bean>
 
@@ -79,6 +79,31 @@
     <!-- 配置RedisTemplate -->
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
         <property name="connectionFactory" ref="jedisConnectionFactory" />
+        <!--
+     　　①redis以键值对的形式存储缓存数据，而且会对对象进行序列化，如上图可以看到，键和值前面都有一串序列化的字符
+    　　 ② RedisTemplate默认采用的是JDK的序列化策略，保存的key和value都是采用此策略序列化保存的。JdkSerializationRedisSerializer
+    　　 ③SDR默认采用的序列化策略有两种，一种是String的序列化策略，一种是JDK的序列化策略。
+       　　　　 StringRedisTemplate默认采用的是String的序列化策略，保存的key和value都是采用此策略序列化保存的。StringRedisSerializer
+       　　　　 RedisTemplate默认采用的是JDK的序列化策略，保存的key和value都是采用此策略序列化保存的。JdkSerializationRedisSerializer
+    　　　就是因为序列化策略的不同，即使是同一个key用不同的Template去序列化，结果是不同的。所以根据key去删除数据的时候就出现了删除失败的问题。
+    　　 ④在上面配置文件中，没有显式的给出序列化策略，会有默认的序列化策略。
+    　　 ⑤如果因为序列化策略不同，可以区显式的设置　　具体可参考：http://blog.csdn.net/y666666y/article/details/70212767
+        -->
+        <!--如果不配置Serializer，那么StringRedisTemplate存储的时候缺省使用String，如果用User类型存储，那么会提示错误User can't cast to String！！  -->
+        <property name="keySerializer" >
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="valueSerializer" >
+            <bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer" />
+        </property>
+        <property name="hashKeySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="hashValueSerializer">
+            <bean class="org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer"/>
+        </property>
+        <!--开启事务  -->
+        <property name="enableTransactionSupport" value="true"></property>
     </bean>
 
     <!-- 配置RedisCacheManager -->
@@ -88,10 +113,10 @@
     </bean>
 
     <!-- 配置RedisCacheConfig -->
-    <bean id="redisCacheConfig" class="com.xiaobai.configure.RedisCacheConfig">
-        <constructor-arg ref="jedisConnectionFactory" />
-        <constructor-arg ref="redisTemplate" />
-        <constructor-arg ref="redisCacheManager" />
-    </bean>
+    <!--<bean id="redisCacheConfig" class="com.xiaobai.configure.RedisCacheConfig">-->
+        <!--<constructor-arg ref="jedisConnectionFactory" />-->
+        <!--<constructor-arg ref="redisTemplate" />-->
+        <!--<constructor-arg ref="redisCacheManager" />-->
+    <!--</bean>-->
     <!-- redis config end -->
 </beans>
