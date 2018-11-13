@@ -77,6 +77,10 @@
     </bean>
 
     <!-- 配置RedisTemplate -->
+    <!-- redis 序列化策略 ，通常情况下key值采用String序列化策略， -->
+    <!-- 如果不指定序列化策略，StringRedisTemplate的key和value都将采用String序列化策略； -->
+    <!-- 但是RedisTemplate的key和value都将采用JDK序列化 这样就会出现采用不同template保存的数据不能用同一个template删除的问题 -->
+    <!--如果不配置Serializer，那么StringRedisTemplate存储的时候缺省使用String，如果用User类型存储，那么会提示错误User can't cast to String！！  -->
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
         <property name="connectionFactory" ref="jedisConnectionFactory" />
         <!--
@@ -89,7 +93,6 @@
     　　 ④在上面配置文件中，没有显式的给出序列化策略，会有默认的序列化策略。
     　　 ⑤如果因为序列化策略不同，可以区显式的设置　　具体可参考：http://blog.csdn.net/y666666y/article/details/70212767
         -->
-        <!--如果不配置Serializer，那么StringRedisTemplate存储的时候缺省使用String，如果用User类型存储，那么会提示错误User can't cast to String！！  -->
         <property name="keySerializer" >
             <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
         </property>
